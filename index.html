@@ -1,1 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Fresh Cow Milk - Version 2</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e8f5e9, #e3f2fd);
+    color: #222;
+}
+
+header {
+    background: #1976d2;
+    color: white;
+    text-align: center;
+    padding: 22px 10px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+header p {
+    margin: 8px 0 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 18px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 7px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    font-size: 16px;
+}
+
+textarea {
+    height: 90px;
+    resize: vertical;
+}
+
+.cow-info {
+    background: #f1f8e9;
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+    display: none;
+}
+
+.price {
+    color: #2e7d32;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.total {
+    background: #e3f2fd;
+    padding: 18px;
+    border-radius: 12px;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    margin-top: 20px;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.whatsapp {
+    background: #25D366;
+    color: white;
+}
+
+.whatsapp:hover {
+    background: #1ebe5d;
+}
+
+.clear {
+    background: #ef5350;
+    color: white;
+}
+
+.order {
+    background: #fafafa;
+    border-left: 5px solid #1976d2;
+    padding: 15px;
+    margin-top: 12px;
+    border-radius: 8px;
+}
+
+.empty {
+    text-align: center;
+    color: #777;
+}
+
+.footer {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🥛 Fresh Cow Milk</h1>
+    <p>Fresh Milk • Home Delivery</p>
+</header>
+
+<div class="container">
+
+<!-- ORDER FORM -->
+
+<div class="card">
+
+<h2>🛒 Place Your Order</h2>
+
+<label>Customer Name</label>
+<input
+    type="text"
+    id="name"
+    placeholder="Enter your name"
+>
+
+<label>Mobile Number</label>
+<input
+    type="tel"
+    id="mobile"
+    placeholder="Enter customer mobile number"
+>
+
+<label>Select Cow Type</label>
+
+<select id="cow" onchange="showCowInfo()">
+
+<option value="">-- Select Cow --</option>
+
+<option value="Gir Cow" data-price="90">
+Gir Cow - ₹90/L
+</option>
+
+<option value="Sahiwal Cow" data-price="80">
+Sahiwal Cow - ₹80/L
+</option>
+
+<option value="Jersey Cow" data-price="70">
+Jersey Cow - ₹70/L
+</option>
+
+<option value="HF Cow" data-price="65">
+HF Cow - ₹65/L
+</option>
+
+<option value="Local Cow" data-price="60">
+Local Cow - ₹60/L
+</option>
+
+</select>
+
+<div class="cow-info" id="cowInfo">
+    <div id="cowDescription"></div>
+    <div class="price" id="cowPrice"></div>
+</div>
+
+<label>Milk Quantity</label>
+
+<select id="liters" onchange="calculateTotal()">
+
+<option value="">-- Select Quantity --</option>
+
+<option value="1">1 Liter</option>
+<option value="2">2 Liters</option>
+<option value="3">3 Liters</option>
+<option value="4">4 Liters</option>
+<option value="5">5 Liters</option>
+<option value="6">6 Liters</option>
+<option value="7">7 Liters</option>
+<option value="8">8 Liters</option>
+<option value="9">9 Liters</option>
+<option value="10">10 Liters</option>
+
+</select>
+
+<label>Delivery Date</label>
+
+<input type="date" id="date">
+
+<label>Delivery Time</label>
+
+<input type="time" id="time">
+
+<label>Delivery Address</label>
+
+<textarea
+    id="address"
+    placeholder="Enter complete delivery address"
+></textarea>
+
+<div class="total">
+    Total Amount: ₹<span id="total">0</span>
+</div>
+
+<button class="whatsapp" onclick="sendWhatsApp()">
+    📱 ORDER ON WHATSAPP
+</button>
+
+</div>
+
+
+<!-- ORDER HISTORY -->
+
+<div class="card">
+
+<h2>📋 Order History</h2>
+
+<div id="orders"></div>
+
+<button class="clear" onclick="clearOrders()">
+    🗑️ Clear Order History
+</button>
+
+</div>
+
+</div>
+
+<div class="footer">
+    🐄 Fresh Milk Delivery | Thank You
+</div>
+
+
+<script>
+
+/* ------------------------------
+   COW INFORMATION
+------------------------------ */
+
+const cowDetails = {
+
+    "Gir Cow": {
+        price: 90,
+        description: "Gir cow milk - rich and creamy."
+    },
+
+    "Sahiwal Cow": {
+        price: 80,
+        description: "Sahiwal cow milk - fresh and nutritious."
+    },
+
+    "Jersey Cow": {
+        price: 70,
+        description: "Jersey cow milk - smooth and fresh."
+    },
+
+    "HF Cow": {
+        price: 65,
+        description: "HF cow milk - fresh daily milk."
+    },
+
+    "Local Cow": {
+        price: 60,
+        description: "Local cow milk - traditional fresh milk."
+    }
+
+};
+
+
+/* ------------------------------
+   SHOW COW INFORMATION
+------------------------------ */
+
+function showCowInfo() {
+
+    const cow = document.getElementById("cow").value;
+
+    const info = document.getElementById("cowInfo");
+
+    if (cow === "") {
+
+        info.style.display = "none";
+
+        return;
+    }
+
+    const data = cowDetails[cow];
+
+    document.getElementById("cowDescription").innerText =
+        data.description;
+
+    document.getElementById("cowPrice").innerText =
+        "Price: ₹" + data.price + " / Liter";
+
+    info.style.display = "block";
+
+    calculateTotal();
+}
+
+
+/* ------------------------------
+   CALCULATE TOTAL
+------------------------------ */
+
+function calculateTotal() {
+
+    const cow = document.getElementById("cow").value;
+
+    const liters =
+        Number(document.getElementById("liters").value);
+
+    if (cow === "" || liters === 0) {
+
+        document.getElementById("total").innerText = "0";
+
+        return;
+    }
+
+    const price = cowDetails[cow].price;
+
+    const total = price * liters;
+
+    document.getElementById("total").innerText = total;
+}
+
+
+/* ------------------------------
+   SEND WHATSAPP
+------------------------------ */
+
+function sendWhatsApp() {
+
+    const name =
+        document.getElementById("name").value.trim();
+
+    const mobile =
+        document.getElementById("mobile").value.trim();
+
+    const cow =
+        document.getElementById("cow").value;
+
+    const liters =
+        document.getElementById("liters").value;
+
+    const date =
+        document.getElementById("date").value;
+
+    const time =
+        document.getElementById("time").value;
+
+    const address =
+        document.getElementById("address").value.trim();
+
+    if (
+        name === "" ||
+        mobile === "" ||
+        cow === "" ||
+        liters === "" ||
+        date === "" ||
+        time === "" ||
+        address === ""
+    ) {
+
+        alert("Please fill all details.");
+
+        return;
+    }
+
+
+    const price = cowDetails[cow].price;
+
+    const total = price * Number(liters);
+
+
+    /* Save order */
+
+    const order = {
+
+        name: name,
+        mobile: mobile,
+        cow: cow,
+        liters: liters,
+        date: date,
+        time: time,
+        address: address,
+        total: total
+
+    };
+
+
+    let orders =
+        JSON.parse(localStorage.getItem("milkOrders")) || [];
+
+    orders.push(order);
+
+    localStorage.setItem(
+        "milkOrders",
+        JSON.stringify(orders)
+    );
+
+
+    /* WhatsApp message */
+
+    const whatsappNumber = "917093076093";
+
+    const message =
+`🥛 *NEW MILK ORDER*
+
+👤 Customer: ${name}
+
+📞 Mobile: ${mobile}
+
+🐄 Cow Type: ${cow}
+
+🥛 Quantity: ${liters} Liter(s)
+
+💰 Price: ₹${price}/Liter
+
+💵 Total Amount: ₹${total}
+
+📅 Delivery Date: ${date}
+
+⏰ Delivery Time: ${time}
+
+🏠 Delivery Address:
+${address}
+
+Thank you for ordering fresh milk! 🐄🥛`;
+
+
+    const url =
+        "https://wa.me/" +
+        whatsappNumber +
+        "?text=" +
+        encodeURIComponent(message);
+
+
+    window.open(url, "_blank");
+
+
+    displayOrders();
+}
+
+
+/* ------------------------------
+   DISPLAY ORDER HISTORY
+------------------------------ */
+
+function displayOrders() {
+
+    const ordersDiv =
+        document.getElementById("orders");
+
+    const orders =
+        JSON.parse(localStorage.getItem("milkOrders")) || [];
+
+
+    if (orders.length === 0) {
+
+        ordersDiv.innerHTML =
+            '<div class="empty">No orders yet.</div>';
+
+        return;
+    }
+
+
+    ordersDiv.innerHTML = "";
+
+
+    orders.forEach((order, index) => {
+
+        const div = document.createElement("div");
+
+        div.className = "order";
+
+        div.innerHTML = `
+
+        <strong>Order #${index + 1}</strong>
+
+        <p>👤 ${order.name}</p>
+
+        <p>🐄 ${order.cow}</p>
+
+        <p>🥛 ${order.liters} Liter(s)</p>
+
+        <p>💰 ₹${order.total}</p>
+
+        <p>📅 ${order.date}</p>
+
+        <p>⏰ ${order.time}</p>
+
+        <p>🏠 ${order.address}</p>
+
+        `;
+
+        ordersDiv.appendChild(div);
+
+    });
+
+}
+
+
+/* ------------------------------
+   CLEAR ORDERS
+------------------------------ */
+
+function clearOrders() {
+
+    if (
+        confirm("Are you sure you want to delete all orders?")
+    ) {
+
+        localStorage.removeItem("milkOrders");
+
+        displayOrders();
+
+    }
+
+}
+
+
+/* ------------------------------
+   LOAD ORDERS WHEN PAGE OPENS
+------------------------------ */
+
+displayOrders();
+
+</script>
+
+</body>
+</html>
